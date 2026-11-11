@@ -1,12 +1,32 @@
 const express = require('express');
 const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swagger');
 require('dotenv').config();
 
 const app = express();
 
+// Pastikan folder uploads/image tersedia
+const fs = require('fs');
+if (!fs.existsSync('uploads/image')) {
+    fs.mkdirSync('uploads/image', { recursive: true });
+}
+
 // Middleware
 app.use(express.json());
 app.use(cors());
+
+// ── Swagger UI ───────────────────────────────────────────────
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    customSiteTitle: 'Youth Tiger Soccer School API',
+    customCss: '.swagger-ui .topbar { background-color: #1a1a2e; }',
+    swaggerOptions: { persistAuthorization: true },
+}));
+
+// Redirect root ke Swagger UI
+app.get('/', (_req, res) => {
+    res.redirect('/api-docs');
+});
 
 // Mengimpor rute
 const studentRoutes = require('./student/routes/studentsRoutes');
